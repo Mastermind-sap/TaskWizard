@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../model/todo.dart';
 import '../constants/colors.dart';
@@ -13,14 +16,21 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  final todosList = ToDo.todoList();
-  List<ToDo> _foundToDo = [];
+  late SharedPreferences sharedPreferences;
+  // var todosList = ToDo.todosList();
+  List<ToDo> todosList = [];
   final _todoController = TextEditingController();
 
   @override
   void initState() {
-    _foundToDo = todosList;
+    // _foundToDo = todosList;
+    initSharedPreferences();
     super.initState();
+  }
+
+  initSharedPreferences() async {
+    sharedPreferences = await SharedPreferences.getInstance();
+    loadData();
   }
 
   @override
@@ -56,7 +66,7 @@ class _HomeState extends State<Home> {
                 Expanded(
                   child: ListView(
                     children: [
-                      for (ToDo todoo in _foundToDo.reversed)
+                      for (ToDo todoo in todosList.reversed)
                         ToDoItem(
                           todo: todoo,
                           onToDoChanged: _handleToDoChange,
@@ -116,7 +126,6 @@ class _HomeState extends State<Home> {
                               ? _addToDoItem(_todoController.text)
                               : ScaffoldMessenger.of(context)
                                   .showSnackBar(SnackBar(
-                                  /// need to set following properties for best effect of awesome_snackbar_content
                                   elevation: 0,
                                   behavior: SnackBarBehavior.floating,
                                   backgroundColor: Colors.transparent,
@@ -124,8 +133,6 @@ class _HomeState extends State<Home> {
                                     title: 'On Snap!',
                                     message:
                                         'ToDo item cannot be empty.\nPlease fill appropriate todo item!',
-
-                                    /// change contentType to ContentType.success, ContentType.warning or ContentType.help for variants
                                     contentType: ContentType.failure,
                                   ),
                                 ));
@@ -150,13 +157,29 @@ class _HomeState extends State<Home> {
   void _handleToDoChange(ToDo todo) {
     setState(() {
       todo.isDone = !todo.isDone;
+      if (todo.isDone == true) {
+        final snackbar = SnackBar(
+            elevation: 0,
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: Colors.transparent,
+            content: AwesomeSnackbarContent(
+              title: 'Congratulations!',
+              message:
+                  'On successfully completing your task : ${todo.todoText}',
+              contentType: ContentType.success,
+            ));
+        ScaffoldMessenger.of(context).showSnackBar(snackbar);
+      }
     });
+
+    saveData();
   }
 
   void _deleteToDoItem(String id) {
     setState(() {
       todosList.removeWhere((item) => item.id == id);
     });
+    saveData();
   }
 
   void _addToDoItem(String toDo) {
@@ -166,6 +189,7 @@ class _HomeState extends State<Home> {
         todoText: toDo,
       ));
     });
+    saveData();
     _todoController.clear();
   }
 
@@ -182,8 +206,21 @@ class _HomeState extends State<Home> {
     }
 
     setState(() {
-      _foundToDo = results;
+      todosList = results;
     });
+  }
+
+  void saveData() {
+    List<String> spList =
+        todosList.map((item) => json.encode(item.toMap())).toList();
+    sharedPreferences.setStringList("list", spList);
+    // print(spList);
+  }
+
+  void loadData() {
+    List<String>? spList = sharedPreferences.getStringList("list");
+    todosList = spList!.map((item) => ToDo.fromMap(json.decode(item))).toList();
+    setState(() {});
   }
 
   Widget searchBox() {
