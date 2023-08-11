@@ -20,6 +20,8 @@ class _HomeState extends State<Home> {
   // var todosList = ToDo.todosList();
   List<ToDo> todosList = [];
   final _todoController = TextEditingController();
+  bool light = false;
+  String changeTheme = "Light";
 
   @override
   void initState() {
@@ -31,6 +33,7 @@ class _HomeState extends State<Home> {
   initSharedPreferences() async {
     sharedPreferences = await SharedPreferences.getInstance();
     loadData();
+    loadTheme();
   }
 
   @override
@@ -38,6 +41,74 @@ class _HomeState extends State<Home> {
     return Scaffold(
       backgroundColor: appBGColor,
       appBar: _buildAppBar(),
+      drawer: Drawer(
+        backgroundColor: appBGColor,
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            DrawerHeader(
+              //   decoration: BoxDecoration(
+              //     color: titleBGColor,
+              //   ),
+              //   child: Text('Task Wizard'),
+              //
+              decoration: BoxDecoration(
+                image: const DecorationImage(
+                  fit: BoxFit.contain,
+                  image: AssetImage('assets/images/logo.png'),
+                ),
+                border: Border.all(
+                  color: outlineColor,
+                  width: 5,
+                ),
+                shape: BoxShape.circle,
+                color: componentsColor,
+                boxShadow: [
+                  BoxShadow(
+                    color: outlineColor,
+                    offset: Offset(
+                      0.0,
+                      0.0,
+                    ),
+                    blurRadius: 100.0,
+                    spreadRadius: 10.0,
+                  ),
+                ],
+              ),
+              child: null,
+            ),
+            const SizedBox(height: 20),
+            ListTile(
+              tileColor: titleBGColor,
+              textColor: textColor,
+              title: Text('Home'),
+              onTap: () {
+                Navigator.pop(context);
+              },
+            ),
+            const SizedBox(height: 10),
+            ListTile(
+              tileColor: titleBGColor,
+              textColor: textColor,
+              title: Text('$changeTheme Mode'),
+              onTap: () {
+                light = !light;
+                saveTheme();
+              },
+            ),
+            const SizedBox(height: 10),
+            ListTile(
+              tileColor: titleBGColor,
+              textColor: textColor,
+              title: Text('Profile'),
+              onTap: () {
+                Navigator.pop(context);
+              },
+            ),
+            const SizedBox(height: 10),
+          ],
+        ),
+      ),
       body: Stack(
         children: [
           Container(
@@ -49,7 +120,7 @@ class _HomeState extends State<Home> {
               children: [
                 searchBox(),
                 Container(
-                  color: black,
+                  color: appBGColor,
                   width: MediaQuery.of(context).size.width,
                   margin: EdgeInsets.only(
                     top: 20,
@@ -60,7 +131,7 @@ class _HomeState extends State<Home> {
                     style: TextStyle(
                         fontSize: 30,
                         fontWeight: FontWeight.w500,
-                        color: white),
+                        color: textColor),
                   ),
                 ),
                 Expanded(
@@ -90,10 +161,10 @@ class _HomeState extends State<Home> {
                           vertical: 5,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.white,
-                          boxShadow: const [
+                          color: componentsColor,
+                          boxShadow: [
                             BoxShadow(
-                              color: Colors.grey,
+                              color: outlineColor,
                               offset: Offset(0.0, 0.0),
                               blurRadius: 10.0,
                               spreadRadius: 0.0,
@@ -105,6 +176,7 @@ class _HomeState extends State<Home> {
                           controller: _todoController,
                           decoration: InputDecoration(
                               hintText: 'Add a new todo item',
+                              hintStyle: TextStyle(color: hintColor),
                               border: InputBorder.none),
                         ),
                       ),
@@ -138,7 +210,7 @@ class _HomeState extends State<Home> {
                                 ));
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: violet,
+                          backgroundColor: outlineColor,
                           minimumSize: Size(60, 60),
                           elevation: 10,
                         ),
@@ -168,6 +240,7 @@ class _HomeState extends State<Home> {
                   'On successfully completing your task : ${todo.todoText}',
               contentType: ContentType.success,
             ));
+        ScaffoldMessenger.of(context).removeCurrentSnackBar();
         ScaffoldMessenger.of(context).showSnackBar(snackbar);
       }
     });
@@ -175,11 +248,60 @@ class _HomeState extends State<Home> {
     saveData();
   }
 
-  void _deleteToDoItem(String id) {
-    setState(() {
-      todosList.removeWhere((item) => item.id == id);
-    });
-    saveData();
+  Future<void> _deleteToDoItem(String id) async {
+    bool del = false;
+    await showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Do you want to delete?'),
+        content: Text(
+            'Task: ${todosList.firstWhere((element) => element.id == id).todoText}'),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context, 'Confirm');
+              del = true;
+            },
+            child: const Text('Confirm'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context, 'Cancel');
+              del = false;
+            },
+            child: const Text('Cancel'),
+          ),
+        ],
+      ),
+      barrierDismissible: false,
+    );
+    if (del) {
+      ToDo temp = ToDo(
+        id: id,
+        todoText: todosList.firstWhere((element) => element.id == id).todoText,
+        isDone: todosList.firstWhere((element) => element.id == id).isDone,
+      );
+      setState(() {
+        final snackBar = SnackBar(
+          content: Text('Deleted ${temp.todoText}'),
+          action: SnackBarAction(
+            label: 'Undo',
+            onPressed: () {
+              // Some code to undo the change.
+              todosList.add(temp);
+              todosList.firstWhere((element) => element.id == id).isDone =
+                  temp.isDone;
+              saveData();
+              setState(() {});
+            },
+          ),
+        );
+        ScaffoldMessenger.of(context).removeCurrentSnackBar();
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+        todosList.removeWhere((item) => item.id == id);
+        saveData();
+      });
+    }
   }
 
   void _addToDoItem(String toDo) {
@@ -223,11 +345,41 @@ class _HomeState extends State<Home> {
     setState(() {});
   }
 
+  void loadTheme() {
+    light = sharedPreferences.getBool("theme")!;
+    setTheme();
+    setState(() {});
+  }
+
+  void saveTheme() {
+    sharedPreferences.setBool("theme", light);
+    setTheme();
+    setState(() {});
+  }
+
+  void setTheme() {
+    if (light) {
+      changeTheme = "Dark";
+      titleBGColor = lightV;
+      appBGColor = beige;
+      componentsColor = lighterV;
+      textColor = black;
+      hintColor = white;
+    } else {
+      changeTheme = "Light";
+      titleBGColor = blue;
+      appBGColor = black;
+      componentsColor = white;
+      textColor = black;
+      hintColor = grey;
+    }
+  }
+
   Widget searchBox() {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 15),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: componentsColor,
         borderRadius: BorderRadius.circular(20),
       ),
       child: TextField(
@@ -236,7 +388,7 @@ class _HomeState extends State<Home> {
           contentPadding: EdgeInsets.all(0),
           prefixIcon: Icon(
             Icons.search,
-            color: black,
+            color: componentsColor,
             size: 20,
           ),
           prefixIconConstraints: BoxConstraints(
@@ -245,7 +397,7 @@ class _HomeState extends State<Home> {
           ),
           border: InputBorder.none,
           hintText: 'Search',
-          hintStyle: TextStyle(color: grey),
+          hintStyle: TextStyle(color: hintColor),
         ),
       ),
     );
@@ -256,11 +408,12 @@ class _HomeState extends State<Home> {
       backgroundColor: titleBGColor,
       elevation: 0,
       title: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-        const Icon(
-          Icons.menu,
-          color: black,
-          size: 30,
-        ),
+        // const Icon(
+        //   Icons.menu,
+        //   color: black,
+        //   size: 30,
+        // ),
+        const SizedBox(width: 10),
         const Text(
           "Task Wizard",
           style: TextStyle(
