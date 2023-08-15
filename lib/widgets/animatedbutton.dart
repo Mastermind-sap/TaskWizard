@@ -1,9 +1,6 @@
 //copied from https://github.com/mt-tadayon/flutter_hover_button/blob/master/lib/main.dart
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:todo/constants/colors.dart';
-
-import '../screens/home.dart';
 
 class AnimatedButton extends StatefulWidget {
   final double height;
@@ -63,54 +60,70 @@ class _AnimatedButtonState extends State<AnimatedButton>
       child: Container(
         height: widget.height,
         width: widget.width,
-        child: Material(
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(5.0),
-              side: BorderSide(
-                color: _borderAnimation.value,
-                width: 2,
-              )),
-          child: InkWell(
-            onTap: () {
-              widget.onTapfunc();
-            },
-            onHover: (value) {
-              if (value) {
-                _controller.forward();
-                setState(() {
-                  textColor = Colors.white;
-                  borderColor = widget.animationColor;
-                });
-              } else {
-                _controller.reverse();
-                setState(() {
-                  textColor = white;
-                  borderColor = blue;
-                });
-              }
-            },
-            child: Container(
-              color: appBGColor,
-              child: Stack(
-                children: [
-                  Center(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: widget.animationColor,
-                        borderRadius: BorderRadius.circular(5.0),
+        child: GestureDetector(
+          onLongPress: () {
+            _controller.forward();
+            setState(() {
+              textColor = Colors.white;
+              borderColor = widget.animationColor;
+            });
+          },
+          onLongPressUp: () {
+            _controller.reverse();
+            setState(() {
+              textColor = white;
+              borderColor = blue;
+            });
+          },
+          child: Material(
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(5.0),
+                side: BorderSide(
+                  color: _borderAnimation.value,
+                  width: 2,
+                )),
+            child: InkWell(
+              onTap: () {
+                widget.onTapfunc();
+              },
+              onHover: (value) {
+                if (value) {
+                  _controller.forward();
+                  setState(() {
+                    textColor = Colors.white;
+                    borderColor = widget.animationColor;
+                  });
+                } else {
+                  _controller.reverse();
+                  setState(() {
+                    textColor = white;
+                    borderColor = blue;
+                  });
+                }
+              },
+              child: Container(
+                color: appBGColor,
+                child: Stack(
+                  children: [
+                    Center(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: widget.animationColor,
+                          borderRadius: BorderRadius.circular(5.0),
+                        ),
+                        width: _animation.value,
                       ),
-                      width: _animation.value,
                     ),
-                  ),
-                  Center(
-                    child: AnimatedDefaultTextStyle(
-                      duration: Duration(milliseconds: 300),
-                      style: TextStyle(color: textColor),
-                      child: Text(widget.text),
-                      curve: Curves.easeIn,
-                    ),
-                  )
-                ],
+                    Center(
+                      child: AnimatedDefaultTextStyle(
+                        duration: Duration(milliseconds: 300),
+                        style: TextStyle(color: textColor),
+                        child: Text(widget.text),
+                        curve: Curves.easeIn,
+                      ),
+                    )
+                  ],
+                ),
               ),
             ),
           ),

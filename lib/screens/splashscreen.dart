@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:todo/screens/home.dart';
 import 'package:todo/screens/login.dart';
 
 import '../constants/colors.dart';
