@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:todo/screens/home.dart';
+import 'package:todo/screens/login.dart';
 
 import '../constants/colors.dart';
 
@@ -15,19 +16,19 @@ class _SplashState extends State<Splash> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    _navigatetohome();
+    _navigatetologin();
   }
 
-  _navigatetohome() async {
+  _navigatetologin() async {
     await Future.delayed(Duration(milliseconds: 1500), () {});
     Navigator.pushReplacement(context as BuildContext,
-        MaterialPageRoute(builder: (context) => Home()));
+        MaterialPageRoute(builder: (context) => LoginPage()));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: black,
+        backgroundColor: appBGColor,
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,

@@ -100,7 +100,76 @@ class _HomeState extends State<Home> {
             ListTile(
               tileColor: titleBGColor,
               textColor: textColor,
-              title: Text('Profile'),
+              title: Text('About'),
+              onTap: () {
+                Navigator.pop(context);
+              },
+            ),
+            const SizedBox(height: 10),
+            ListTile(
+              tileColor: titleBGColor,
+              textColor: textColor,
+              title: Text('Contact Us'),
+              onTap: () {
+                Navigator.pop(context);
+              },
+            ),
+            const SizedBox(height: 10),
+          ],
+        ),
+      ),
+      endDrawer: Drawer(
+        backgroundColor: appBGColor,
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            DrawerHeader(
+              decoration: BoxDecoration(
+                image: const DecorationImage(
+                  fit: BoxFit.contain,
+                  image: AssetImage('assets/images/avatar.jpeg'),
+                ),
+                border: Border.all(
+                  color: outlineColor,
+                  width: 5,
+                ),
+                shape: BoxShape.circle,
+                color: componentsColor,
+                boxShadow: [
+                  BoxShadow(
+                    color: outlineColor,
+                    offset: Offset(
+                      0.0,
+                      0.0,
+                    ),
+                    blurRadius: 100.0,
+                    spreadRadius: 10.0,
+                  ),
+                ],
+              ),
+              child: null,
+            ),
+            const SizedBox(height: 20),
+            ListTile(
+              tileColor: titleBGColor,
+              textColor: textColor,
+              title: Text("Username"),
+              onTap: () {
+                Navigator.pop(context);
+              },
+            ),
+            const SizedBox(height: 10),
+            ListTile(
+              tileColor: titleBGColor,
+              textColor: textColor,
+              title: Text("Settings"),
+              onTap: () {},
+            ),
+            const SizedBox(height: 10),
+            ListTile(
+              tileColor: titleBGColor,
+              textColor: textColor,
+              title: Text("Logout"),
               onTap: () {
                 Navigator.pop(context);
               },
@@ -407,27 +476,28 @@ class _HomeState extends State<Home> {
     return AppBar(
       backgroundColor: titleBGColor,
       elevation: 0,
-      title: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-        // const Icon(
-        //   Icons.menu,
-        //   color: black,
-        //   size: 30,
-        // ),
-        const SizedBox(width: 10),
-        const Text(
-          "Task Wizard",
-          style: TextStyle(
-              fontSize: 30, fontWeight: FontWeight.bold, color: black),
-        ),
-        Container(
-          height: 40,
-          width: 40,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(20),
-            child: Image.asset('assets/images/avatar.jpeg'),
+      centerTitle: true,
+      title: const Text(
+        "Task Wizard",
+        style:
+            TextStyle(fontSize: 30, fontWeight: FontWeight.bold, color: black),
+      ),
+      actions: [
+        Builder(
+          builder: (context) => IconButton(
+            icon: SizedBox(
+              height: 40,
+              width: 40,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: Image.asset('assets/images/avatar.jpeg'),
+              ),
+            ),
+            onPressed: () => Scaffold.of(context).openEndDrawer(),
+            tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
           ),
         ),
-      ]),
+      ],
     );
   }
 }
