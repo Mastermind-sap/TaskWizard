@@ -7,9 +7,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../model/todo.dart';
 import '../constants/colors.dart';
 import '../widgets/todo_item.dart';
+import '../model/theme.dart';
+import '../widgets/appbar.dart';
 
 class Home extends StatefulWidget {
-  Home({Key? key}) : super(key: key);
+  const Home({Key? key}) : super(key: key);
 
   @override
   State<Home> createState() => _HomeState();
@@ -17,7 +19,6 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   late SharedPreferences sharedPreferences;
-  // var todosList = ToDo.todosList();
   List<ToDo> todosList = [];
   final _todoController = TextEditingController();
   bool light = false;
@@ -25,7 +26,6 @@ class _HomeState extends State<Home> {
 
   @override
   void initState() {
-    // _foundToDo = todosList;
     initSharedPreferences();
     super.initState();
   }
@@ -33,25 +33,21 @@ class _HomeState extends State<Home> {
   initSharedPreferences() async {
     sharedPreferences = await SharedPreferences.getInstance();
     loadData();
-    loadTheme();
+    loadTheme(light, changeTheme, sharedPreferences);
+    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: appBGColor,
-      appBar: _buildAppBar(),
+      appBar: CustomAppBar(),
       drawer: Drawer(
         backgroundColor: appBGColor,
         child: ListView(
           padding: EdgeInsets.zero,
           children: [
             DrawerHeader(
-              //   decoration: BoxDecoration(
-              //     color: titleBGColor,
-              //   ),
-              //   child: Text('Task Wizard'),
-              //
               decoration: BoxDecoration(
                 image: const DecorationImage(
                   fit: BoxFit.contain,
@@ -66,7 +62,7 @@ class _HomeState extends State<Home> {
                 boxShadow: [
                   BoxShadow(
                     color: outlineColor,
-                    offset: Offset(
+                    offset: const Offset(
                       0.0,
                       0.0,
                     ),
@@ -81,7 +77,7 @@ class _HomeState extends State<Home> {
             ListTile(
               tileColor: titleBGColor,
               textColor: textColor,
-              title: Text('Home'),
+              title: const Text('Home'),
               onTap: () {
                 Navigator.pop(context);
               },
@@ -93,14 +89,15 @@ class _HomeState extends State<Home> {
               title: Text('$changeTheme Mode'),
               onTap: () {
                 light = !light;
-                saveTheme();
+                saveTheme(light, changeTheme, sharedPreferences);
+                setState(() {});
               },
             ),
             const SizedBox(height: 10),
             ListTile(
               tileColor: titleBGColor,
               textColor: textColor,
-              title: Text('About'),
+              title: const Text('About'),
               onTap: () {
                 Navigator.pop(context);
               },
@@ -109,7 +106,7 @@ class _HomeState extends State<Home> {
             ListTile(
               tileColor: titleBGColor,
               textColor: textColor,
-              title: Text('Contact Us'),
+              title: const Text('Contact Us'),
               onTap: () {
                 Navigator.pop(context);
               },
@@ -138,7 +135,7 @@ class _HomeState extends State<Home> {
                 boxShadow: [
                   BoxShadow(
                     color: outlineColor,
-                    offset: Offset(
+                    offset: const Offset(
                       0.0,
                       0.0,
                     ),
@@ -153,7 +150,7 @@ class _HomeState extends State<Home> {
             ListTile(
               tileColor: titleBGColor,
               textColor: textColor,
-              title: Text("Username"),
+              title: const Text("Username"),
               onTap: () {
                 Navigator.pop(context);
               },
@@ -162,14 +159,14 @@ class _HomeState extends State<Home> {
             ListTile(
               tileColor: titleBGColor,
               textColor: textColor,
-              title: Text("Settings"),
+              title: const Text("Settings"),
               onTap: () {},
             ),
             const SizedBox(height: 10),
             ListTile(
               tileColor: titleBGColor,
               textColor: textColor,
-              title: Text("Logout"),
+              title: const Text("Logout"),
               onTap: () {
                 Navigator.pop(context);
               },
@@ -181,7 +178,7 @@ class _HomeState extends State<Home> {
       body: Stack(
         children: [
           Container(
-            padding: EdgeInsets.symmetric(
+            padding: const EdgeInsets.symmetric(
               horizontal: 20,
               vertical: 15,
             ),
@@ -191,7 +188,7 @@ class _HomeState extends State<Home> {
                 Container(
                   color: appBGColor,
                   width: MediaQuery.of(context).size.width,
-                  margin: EdgeInsets.only(
+                  margin: const EdgeInsets.only(
                     top: 20,
                     bottom: 20,
                   ),
@@ -220,12 +217,12 @@ class _HomeState extends State<Home> {
                   child: Row(children: [
                     Expanded(
                       child: Container(
-                        margin: EdgeInsets.only(
+                        margin: const EdgeInsets.only(
                           bottom: 20,
                           right: 20,
                           left: 20,
                         ),
-                        padding: EdgeInsets.symmetric(
+                        padding: const EdgeInsets.symmetric(
                           horizontal: 20,
                           vertical: 5,
                         ),
@@ -234,7 +231,7 @@ class _HomeState extends State<Home> {
                           boxShadow: [
                             BoxShadow(
                               color: outlineColor,
-                              offset: Offset(0.0, 0.0),
+                              offset: const Offset(0.0, 0.0),
                               blurRadius: 10.0,
                               spreadRadius: 0.0,
                             ),
@@ -251,17 +248,11 @@ class _HomeState extends State<Home> {
                       ),
                     ),
                     Container(
-                      margin: EdgeInsets.only(
+                      margin: const EdgeInsets.only(
                         bottom: 20,
                         right: 20,
                       ),
                       child: ElevatedButton(
-                        child: Text(
-                          '+',
-                          style: TextStyle(
-                            fontSize: 40,
-                          ),
-                        ),
                         onPressed: () {
                           _todoController.text.isNotEmpty
                               ? _addToDoItem(_todoController.text)
@@ -280,8 +271,14 @@ class _HomeState extends State<Home> {
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: outlineColor,
-                          minimumSize: Size(60, 60),
+                          minimumSize: const Size(60, 60),
                           elevation: 10,
+                        ),
+                        child: const Text(
+                          '+',
+                          style: TextStyle(
+                            fontSize: 40,
+                          ),
                         ),
                       ),
                     ),
@@ -414,39 +411,9 @@ class _HomeState extends State<Home> {
     setState(() {});
   }
 
-  void loadTheme() {
-    light = sharedPreferences.getBool("theme")!;
-    setTheme();
-    setState(() {});
-  }
-
-  void saveTheme() {
-    sharedPreferences.setBool("theme", light);
-    setTheme();
-    setState(() {});
-  }
-
-  void setTheme() {
-    if (light) {
-      changeTheme = "Dark";
-      titleBGColor = lightV;
-      appBGColor = beige;
-      componentsColor = lighterV;
-      textColor = black;
-      hintColor = white;
-    } else {
-      changeTheme = "Light";
-      titleBGColor = blue;
-      appBGColor = black;
-      componentsColor = white;
-      textColor = black;
-      hintColor = grey;
-    }
-  }
-
   Widget searchBox() {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 15),
+      padding: const EdgeInsets.symmetric(horizontal: 15),
       decoration: BoxDecoration(
         color: componentsColor,
         borderRadius: BorderRadius.circular(20),
@@ -454,13 +421,13 @@ class _HomeState extends State<Home> {
       child: TextField(
         onChanged: (value) => _runFilter(value),
         decoration: InputDecoration(
-          contentPadding: EdgeInsets.all(0),
+          contentPadding: const EdgeInsets.all(0),
           prefixIcon: Icon(
             Icons.search,
             color: componentsColor,
             size: 20,
           ),
-          prefixIconConstraints: BoxConstraints(
+          prefixIconConstraints: const BoxConstraints(
             maxHeight: 20,
             minWidth: 25,
           ),
@@ -472,32 +439,5 @@ class _HomeState extends State<Home> {
     );
   }
 
-  AppBar _buildAppBar() {
-    return AppBar(
-      backgroundColor: titleBGColor,
-      elevation: 0,
-      centerTitle: true,
-      title: const Text(
-        "Task Wizard",
-        style:
-            TextStyle(fontSize: 30, fontWeight: FontWeight.bold, color: black),
-      ),
-      actions: [
-        Builder(
-          builder: (context) => IconButton(
-            icon: SizedBox(
-              height: 40,
-              width: 40,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(20),
-                child: Image.asset('assets/images/avatar.jpeg'),
-              ),
-            ),
-            onPressed: () => Scaffold.of(context).openEndDrawer(),
-            tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
-          ),
-        ),
-      ],
-    );
-  }
+  
 }

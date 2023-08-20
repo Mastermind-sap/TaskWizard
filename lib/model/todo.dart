@@ -15,11 +15,7 @@ class ToDo {
         this.isDone = map["isDone"];
 
   Map toMap() {
-    return {
-      "id":this.id,
-      "todoText" :  this.todoText,
-      "isDone":this.isDone
-    };
+    return {"id": this.id, "todoText": this.todoText, "isDone": this.isDone};
   }
 
   // static List<ToDo> todoList() {
